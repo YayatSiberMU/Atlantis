@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kalkulator Amonia Bebas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-white min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white shadow-2xl rounded-2xl p-6 w-full max-w-md transition-all duration-300">
+    <h2 class="text-2xl font-bold mb-6 text-center text-blue-800 flex items-center justify-center gap-2">
+      <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m2 6a9 9 0 11-6-8.485V7a3 3 0 116 0v.515A9 9 0 0117 18z"/></svg>
+      Kalkulator Amonia Bebas (NH₃)
+    </h2>
+
+    <div class="space-y-4">
+      <div>
+        <label class="block font-medium">TAN (mg/L):</label>
+        <input type="text" id="tan" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Contoh: 2.7 atau 2,7" />
+      </div>
+
+      <div>
+        <label class="block font-medium">pH:</label>
+        <input type="text" id="ph" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Contoh: 8.1 atau 8,1" />
+      </div>
+
+      <div>
+        <label class="block font-medium">Suhu (°C):</label>
+        <input type="text" id="suhu" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Contoh: 30" />
+      </div>
+
+      <button onclick="hitungNH3()" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition">
+        Hitung
+      </button>
+    </div>
+
+    <div id="hasil" class="mt-6 p-4 rounded text-center hidden transition-all duration-300"></div>
+  </div>
+
+  <script>
+    function hitungNH3() {
+      const hasilDiv = document.getElementById('hasil');
+
+      let tanInput = document.getElementById('tan').value.trim().replace(",", ".");
+      let phInput = document.getElementById('ph').value.trim().replace(",", ".");
+      let suhuInput = document.getElementById('suhu').value.trim().replace(",", ".");
+
+      let tan = parseFloat(tanInput);
+      let ph = parseFloat(phInput);
+      let suhu = parseFloat(suhuInput);
+
+      if (
+        tanInput === "" || phInput === "" || suhuInput === "" ||
+        isNaN(tan) || isNaN(ph) || isNaN(suhu)
+      ) {
+        hasilDiv.innerHTML = "⚠️ Input angka tidak valid. Gunakan koma atau titik untuk nilai desimal.";
+        hasilDiv.className = 'mt-6 p-4 bg-yellow-200 text-yellow-800 rounded text-center';
+        hasilDiv.style.display = 'block';
+        return;
+      }
+
+      const pKa = 0.09018 + (2729.92 / (suhu + 273.15));
+      const fraksi = 1 / (1 + Math.pow(10, pKa - ph));
+      const nh3 = tan * fraksi;
+      const persen = fraksi * 100;
+
+      let status = "✅ Aman";
+      let warna = "bg-green-100 text-green-800";
+      if (nh3 > 0.1) {
+        status = "⚠️ Waspada";
+        warna = "bg-yellow-100 text-yellow-800";
+      }
+      if (nh3 > 0.3) {
+        status = "❌ Bahaya";
+        warna = "bg-red-100 text-red-800";
+      }
+
+      hasilDiv.innerHTML = `
+        <div class="text-xl font-bold">Hasil Perhitungan</div>
+        <div class="mt-2">NH₃ Bebas: <strong>${nh3.toFixed(3)}</strong> mg/L</div>
+        <div>Fraksi NH₃: ${persen.toFixed(2)}%</div>
+        <div>Status: <strong>${status}</strong></div>
+      `;
+      hasilDiv.className = `mt-6 p-4 rounded text-center ${warna} shadow`;
+      hasilDiv.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
